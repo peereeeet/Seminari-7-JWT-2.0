@@ -1,0 +1,75 @@
+<header class="app-bar">
+  <div class="app-bar__content">
+    <div class="app-bar__logo-title">
+      <img src="assets/images/angular.png" alt="Angular" class="app-bar__logo" />
+      <h1 class="app-bar__title">Demo Angular</h1>
+    </div>
+    <div class="app-bar__user">
+      Bienvenido 👋
+    </div>
+  </div>
+</header>
+
+<main class="home-main">
+  <section class="hero">
+    <div class="hero__content">
+      <span class="hero__icon">👤</span>
+      <h1 class="hero__title">Bienvenido al Sistema</h1>
+      <p class="hero__subtitle">
+        Gestiona usuarios y eventos con una interfaz moderna, intuitiva y eficiente. 
+        Todo lo que necesitas en un solo lugar.
+      </p>
+      
+      <div class="hero__stats">
+        <div class="stat-card">
+          <div class="stat-number" id="userCount">0</div>
+          <div class="stat-label">👥 Usuarios Activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="eventCount">0</div>
+          <div class="stat-label">📅 Eventos Programados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">⚡ Sistema Operativo</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="nav-section">
+    <h2 class="nav__title">Navegación</h2>
+    <p class="nav__subtitle">Accede rápidamente a las secciones principales</p>
+
+    <div class="nav__actions">
+      <a class="nav-card" routerLink="/usuaris">
+        <div class="nav-card__icon">👥</div>
+        <div class="nav-card__content">
+          <h3 class="nav-card__title">Gestión de Usuarios</h3>
+          <p class="nav-card__description">
+            Administra usuarios, permisos y perfiles del sistema
+          </p>
+        </div>
+      </a>
+
+      <a class="nav-card" routerLink="/evento">
+        <div class="nav-card__icon">📅</div>
+        <div class="nav-card__content">
+          <h3 class="nav-card__title">Gestión de Eventos</h3>
+          <p class="nav-card__description">
+            Crea y gestiona eventos, horarios y participantes
+          </p>
+        </div>
+      </a>
+    </div>
+
+    <div class="quick-actions">
+      <a class="quick-action" routerLink="/usuaris">
+        ➕ Nuevo Usuario
+      </a>
+      <a class="quick-action" routerLink="/evento">
+        🎯 Nuevo Evento
+      </a>
+    </div>
+  </section>
+</main>

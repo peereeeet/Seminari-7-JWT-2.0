@@ -1,0 +1,260 @@
+<div class="usuaris-container">
+  <!-- Formulario de usuario -->
+  <div class="form-container">
+    <form (ngSubmit)="agregarElemento(userForm)" #userForm="ngForm">
+      <div class="form-header">
+        <h1>{{ indiceEdicion !== null ? 'Editar usuario' : 'Agregar un nuevo usuario' }}</h1>
+        <button type="button" class="btn-back" (click)="goHome()">
+          ← Volver a Home
+        </button>
+      </div>
+
+      <div class="form-grid">
+        <div class="left-col">
+          <!-- Nombre -->
+          <div class="form-group">
+            <label for="nombre" class="form-label">Nombre:</label>
+            <input
+              id="nombre"
+              class="form-input"
+              [(ngModel)]="nuevoUsuario.username"
+              name="name"
+              #nameCtrl="ngModel"
+              placeholder="Nombre del usuario"
+              required />
+            <div class="error-message" *ngIf="(nameCtrl.touched || formSubmitted) && nameCtrl.errors?.['required']">
+              ⚠️ El nombre es obligatorio.
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="mail" class="form-label">Email:</label>
+            <input
+              id="mail"
+              class="form-input"
+              [(ngModel)]="nuevoUsuario.gmail"
+              name="mail"
+              #mailCtrl="ngModel"
+              placeholder="Email"
+              required
+              email />
+            <div class="error-message" *ngIf="(mailCtrl.touched || formSubmitted) && mailCtrl.errors?.['required']">
+              ⚠️ El email es obligatorio.
+            </div>
+            <div class="error-message" *ngIf="(mailCtrl.touched || formSubmitted) && !mailCtrl.errors?.['required'] && mailCtrl.errors?.['email']">
+              ⚠️ Formato de email no válido.
+            </div>
+          </div>
+
+          <!-- Contraseña -->
+          <div class="form-group">
+            <label for="password" class="form-label">Contraseña:</label>
+            <input
+              id="password"
+              class="form-input"
+              [(ngModel)]="nuevoUsuario.password"
+              name="password"
+              #passCtrl="ngModel"
+              type="password"
+              placeholder="Password"
+              required
+              minlength="7" />
+            <div class="error-message" *ngIf="(passCtrl.touched || formSubmitted) && passCtrl.errors?.['required']">
+              ⚠️ La contraseña es obligatoria.
+            </div>
+            <div class="error-message" *ngIf="(passCtrl.touched || formSubmitted) && !passCtrl.errors?.['required'] && passCtrl.errors?.['minlength']">
+              ⚠️ La contraseña debe tener al menos 7 caracteres.
+            </div>
+          </div>
+
+          <!-- Confirmar contraseña -->
+          <div class="form-group">
+            <label for="confirmarPassword" class="form-label">Confirmar Contraseña:</label>
+            <input
+              id="confirmarPassword"
+              class="form-input"
+              [(ngModel)]="confirmarPassword"
+              name="confirmarPassword"
+              #confirmCtrl="ngModel"
+              type="password"
+              placeholder="Confirmar Password"
+              required
+              minlength="7" />
+            <div class="error-message" *ngIf="(confirmCtrl.touched || formSubmitted) && confirmCtrl.errors?.['required']">
+              ⚠️ Confirmar contraseña es obligatorio.
+            </div>
+            <div class="error-message" *ngIf="(confirmCtrl.touched || formSubmitted) && !confirmCtrl.errors?.['required'] && confirmCtrl.errors?.['minlength']">
+              ⚠️ Debe tener al menos 7 caracteres.
+            </div>
+            <div class="error-message"
+                 *ngIf="(confirmCtrl.touched || formSubmitted)
+                         && confirmarPassword
+                         && nuevoUsuario.password
+                         && confirmarPassword !== nuevoUsuario.password">
+              ⚠️ Las contraseñas no coinciden.
+            </div>
+          </div>
+
+          <!-- Aniversario -->
+          <div class="form-group">
+            <label for="birthday" class="form-label">Aniversario:</label>
+            <input
+              id="birthday"
+              class="form-input"
+              type="date"
+              [(ngModel)]="birthdayStr"
+              name="birthday"
+              #birthdayCtrl="ngModel"
+              required />
+            <div class="error-message" *ngIf="(birthdayCtrl.touched || formSubmitted) && birthdayCtrl.errors?.['required']">
+              ⚠️ El aniversario es obligatorio.
+            </div>
+            <div class="error-message" *ngIf="(birthdayCtrl.touched || formSubmitted) && !birthdayCtrl.errors?.['required'] && isFutureBirthday(birthdayStr)">
+              ⚠️ La fecha no puede ser posterior a hoy.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top: 25px;">
+        <button type="submit" class="submit-button">
+          {{ indiceEdicion !== null ? 'Actualizar' : 'Agregar' }}
+        </button>
+
+        <button
+          *ngIf="indiceEdicion !== null"
+          type="button"
+          class="submit-button cancel"
+          (click)="cancelarEdicion(userForm)">
+          Cancelar edición
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista de usuarios -->
+  <div class="lista-usuarios">
+    <div class="list-header">
+      <h2>Lista de Usuarios</h2>
+      <div class="page-size">
+        <label>Por página</label>
+        <select #sizeSel (change)="setPageSize(sizeSel.value)">
+          <option [selected]="pageSize===3" value="3">3</option>
+          <option [selected]="pageSize===6" value="6">6</option>
+          <option [selected]="pageSize===9" value="9">9</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="pager">
+      <button type="button" (click)="prevPage()" [disabled]="page<=1">«</button>
+      <span class="counter">Página {{ page }} / {{ totalPages }}</span>
+      <button type="button" (click)="nextPage()" [disabled]="page>=totalPages">»</button>
+      <span class="total">Total: {{ usuarios.length }}</span>
+    </div>
+
+    <ul>
+      <li *ngFor="let usuario of pagedUsuarios; let i = index">
+        <div class="user-info">
+          <strong>{{ usuario.username }}</strong>
+          <div class="button-container">
+            <button (click)="toggleDesplegable(idx(i))" class="detalles">
+              {{ desplegado[idx(i)] ? '👁️ Ocultar' : '👁️ Mostrar' }}
+            </button>
+            <button (click)="prepararEdicion(usuario, idx(i))" class="modificar">✏️ Modificar</button>
+            <button (click)="openDeleteModal(idx(i))" class="eliminar">🗑️ Eliminar</button>
+          </div>
+        </div>
+
+        <div *ngIf="desplegado[idx(i)]" class="user-details">
+          <p><strong>Email: </strong> {{ usuario.gmail | maskEmail }}</p>
+
+          <p><strong>Contraseña: </strong>
+            <span *ngIf="mostrarPassword[idx(i)]">{{ usuario.password }}</span>
+            <span *ngIf="!mostrarPassword[idx(i)]">********</span>
+            <button style="margin-left: 10px; padding: 4px 8px; background: var(--primary-500); color: white; border: none; border-radius: 4px; font-size: 0.8rem;" 
+                    (click)="togglePassword(idx(i))">
+              {{ mostrarPassword[idx(i)] ? '🙈 Ocultar' : '👀 Mostrar' }}
+            </button>
+          </p>
+
+          <p><strong>Aniversario: </strong>
+            <strong>{{ usuario.birthday | date: 'dd-MM-yyyy' }}</strong>
+          </p>
+
+          <div class="user-events">
+            <p><strong>Eventos del usuario: </strong> {{ getUserEventNames(usuario) }}</p>
+
+            <div class="available-events" *ngIf="getAvailableEvents(usuario).length > 0">
+              <h4>🎯 Otros eventos disponibles</h4>
+              <ul>
+                <li *ngFor="let ev of getAvailableEvents(usuario)">
+                  <span>{{ ev.name }}</span>
+                  <button class="btn-add" (click)="onAddEvent(usuario, ev)">➕ Añadir</button>
+                </li>
+              </ul>
+            </div>
+            <div class="empty" *ngIf="!getAvailableEvents(usuario).length" style="padding: 10px; color: var(--text-muted); font-style: italic;">
+              ✅ El usuario está en todos los eventos disponibles
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Estado vacío -->
+    <div *ngIf="usuarios.length === 0" class="empty-state">
+      <div class="empty-icon">👥</div>
+      <h3>No hay usuarios registrados</h3>
+      <p>Comienza agregando el primer usuario al sistema</p>
+      <button class="submit-button" (click)="userForm.ngSubmit.emit()">
+        Crear Primer Usuario
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal eliminar -->
+  <div class="modal-overlay" *ngIf="showDeleteModal">
+    <div class="modal">
+      <h3>¿Eliminar usuario?</h3>
+      <p>Esta acción no se puede deshacer. Se eliminarán todos los datos del usuario.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeDeleteModal()">Cancelar</button>
+        <button class="btn-confirm" (click)="confirmarEliminar()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal actualización -->
+  <div class="modal-overlay" *ngIf="showUpdateModal">
+    <div class="modal">
+      <h3>¿Confirmar actualización?</h3>
+      <p>Se guardarán los cambios del usuario en el sistema.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeUpdateModal()">Cancelar</button>
+        <button class="btn-confirm" (click)="confirmarUpdate()">Actualizar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de Tabla Dinámica -->
+  <div class="table-section">
+    <div class="section-header">
+      <h2>Vista de Tabla - Usuarios</h2>
+      <button (click)="toggleTableView()" class="btn-toggle-table">
+        {{ showTableView ? '📊 Ocultar Tabla' : '📊 Mostrar Tabla' }}
+      </button>
+    </div>
+
+    <app-dynamic-table
+      *ngIf="showTableView"
+      [data]="usuariosForTable"
+      [columns]="tableColumns"
+      title="Lista de Usuarios"
+      (onEdit)="onTableEdit($event)"
+      (onDelete)="onTableDelete($event)"
+      (onExport)="exportTable()">
+    </app-dynamic-table>
+  </div>
+</div>

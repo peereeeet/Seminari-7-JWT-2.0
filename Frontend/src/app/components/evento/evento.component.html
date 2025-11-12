@@ -1,0 +1,192 @@
+<div class="evento-container">
+  <!-- Formulario de evento -->
+  <div class="evento-form">
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-header">
+        <h2>Crear nuevo evento</h2>
+        <button type="button" class="btn-back" (click)="goHome()">
+          ← Volver a Home
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label for="name" class="form-label">Título del evento:</label>
+        <input
+          id="name"
+          class="form-input"
+          type="text"
+          [(ngModel)]="newEvent.name"
+          name="name"
+          placeholder="Ej: Reunión de planificación Q4"
+          required />
+      </div>
+
+      <div class="form-two-col">
+        <div class="left-col">
+          <div class="form-group">
+            <label class="form-label">Horario del evento:</label>
+            <div class="schedule-row">
+              <input 
+                type="date" 
+                class="form-input"
+                [(ngModel)]="dateStr" 
+                name="dateStr" 
+                aria-label="Fecha" />
+              <input 
+                type="time" 
+                class="form-input"
+                [(ngModel)]="timeStr" 
+                name="timeStr" 
+                aria-label="Hora" />
+              <button type="button" (click)="setSchedule()" class="add-slot">
+                📅 Establecer horario
+              </button>
+
+              <button
+                type="button"
+                *ngIf="newEvent.schedule && newEvent.schedule !== ''"
+                (click)="clearSchedule()"
+                class="remove-slot">
+                ❌ Quitar
+              </button>
+            </div>
+
+            <div class="schedule-preview">
+              <strong>Seleccionado: </strong>
+              <span *ngIf="newEvent.schedule; else noHorario">
+                {{ getScheduleText(newEvent) }}
+              </span>
+              <ng-template #noHorario><em>Sin horario establecido</em></ng-template>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address" class="form-label">Dirección:</label>
+            <input
+              id="address"
+              class="form-input"
+              type="text"
+              [(ngModel)]="newEvent.address"
+              name="address"
+              placeholder="Ej: C/ Mallorca 123, Barcelona" />
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div class="participants-wrapper">
+            <!-- Usuarios disponibles -->
+            <div class="participants-column">
+              <div class="list-header">
+                <h4>👥 Usuarios disponibles</h4>
+                <div class="page-size">
+                  <label>Por página</label>
+                  <select #availableSize (change)="setAvailablePageSize(availableSize.value)">
+                    <option [selected]="availablePageSize===4" value="4">4</option>
+                    <option [selected]="availablePageSize===6" value="6">6</option>
+                    <option [selected]="availablePageSize===8" value="8">8</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="pager">
+                <button type="button" (click)="availablePrevPage()" [disabled]="availablePage<=1">«</button>
+                <span class="counter">Página {{ availablePage }} / {{ availableTotalPages }}</span>
+                <button type="button" (click)="availableNextPage()" [disabled]="availablePage>=availableTotalPages">»</button>
+                <span class="total">Total: {{ availableUsers.length }}</span>
+              </div>
+
+              <div class="user-row" *ngFor="let u of availablePageItems">
+                <span class="user-name">{{ u.username }}</span>
+                <button type="button" (click)="addParticipant(u)" class="btn-add">➕ Añadir</button>
+              </div>
+              <div class="empty" *ngIf="!availableUsers.length">
+                ✅ Todos los usuarios están en el evento
+              </div>
+            </div>
+
+            <!-- Participantes del evento -->
+            <div class="participants-column">
+              <div class="list-header">
+                <h4>🎯 Participantes del evento</h4>
+                <div class="page-size">
+                  <label>Por página</label>
+                  <select #selectedSize (change)="setSelectedPageSize(selectedSize.value)">
+                    <option [selected]="selectedPageSize===4" value="4">4</option>
+                    <option [selected]="selectedPageSize===6" value="6">6</option>
+                    <option [selected]="selectedPageSize===8" value="8">8</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="pager">
+                <button type="button" (click)="selectedPrevPage()" [disabled]="selectedPage<=1">«</button>
+                <span class="counter">Página {{ selectedPage }} / {{ selectedTotalPages }}</span>
+                <button type="button" (click)="selectedNextPage()" [disabled]="selectedPage>=selectedTotalPages">»</button>
+                <span class="total">Total: {{ selectedUsers.length }}</span>
+              </div>
+
+              <div class="user-row" *ngFor="let u of selectedPageItems">
+                <span class="user-name">{{ u.username }}</span>
+                <button type="button" (click)="removeParticipant(u)" class="btn-remove">➖ Quitar</button>
+              </div>
+              <div class="empty" *ngIf="!selectedUsers.length">
+                ℹ️ Nadie apuntado aún
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit">💾 Guardar Evento</button>
+    </form>
+
+    <div class="error-message" *ngIf="errorMessage">
+      ⚠️ {{ errorMessage }}
+    </div>
+  </div>
+
+  <!-- Lista de eventos -->
+  <div class="evento-list">
+    <h1>Lista de Eventos</h1>
+    
+    <div *ngIf="eventos.length === 0" class="empty-state">
+      <div class="empty-icon">📅</div>
+      <h3>No hay eventos programados</h3>
+      <p>Comienza creando el primer evento del sistema</p>
+    </div>
+
+    <ul *ngIf="eventos.length > 0">
+      <li *ngFor="let evento of eventos; let i = index">
+        <h3>{{ evento.name }}</h3>
+
+        <p><strong>📍 Dirección: </strong> {{ getEventAddress(evento) }}</p>
+
+        <div>
+          <strong>🕒 Horario: </strong>
+          <span>{{ getScheduleText(evento) }}</span>
+        </div>
+
+        <p>
+          <strong>👥 Participantes: </strong>
+          <span>{{ getParticipantsNames(evento) }}</span>
+        </p>
+
+        <div class="actions">
+          <button (click)="openDeleteModal(i)">🗑️ Eliminar Evento</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Modal eliminar -->
+<div class="modal-overlay" *ngIf="showDeleteModal">
+  <div class="modal">
+    <h3>¿Eliminar evento?</h3>
+    <p>Esta acción no se puede deshacer. Se eliminarán todos los datos del evento.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="closeDeleteModal()">Cancelar</button>
+      <button class="btn-confirm" (click)="confirmarEliminar()">Eliminar</button>
+    </div>
+  </div>
+</div>
