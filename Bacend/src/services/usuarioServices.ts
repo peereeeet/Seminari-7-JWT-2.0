@@ -32,12 +32,10 @@ export class UserService {
  }
 
     async updateUserByUsername(username: string, user: Partial<IUsuario>): Promise<IUsuario | null> {
-      
         return await Usuario.findOneAndUpdate({ username }, user, { new: true });
     }
 
     async deleteUserById(id: string): Promise<IUsuario | null> {
-
       return await Usuario.findByIdAndDelete(id);
     }
 

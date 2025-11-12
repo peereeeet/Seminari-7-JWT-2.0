@@ -8,6 +8,7 @@ export interface IUsuario {
     username: string;
     gmail: string;
     password: string;
+    rol : string;
     birthday: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
     isModified(path: string): boolean;
@@ -17,7 +18,7 @@ export interface IUsuario {
 const usuarioSchema = new Schema<IUsuario>({
     username: { type: String, required: true, unique: true },
     gmail: { type: String, required: true, unique: true },
-    //pone unique para que no se repita el correo ni el username entre todos los usuarios de la base de datos
+    rol: { type: String, required: true, enum: ['user', 'admin'], default: 'user' },
     password: { type: String, required: true },
     birthday: { type: Date, required: true },
 }, {

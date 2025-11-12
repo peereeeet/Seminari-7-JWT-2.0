@@ -2,32 +2,28 @@ import { Request, Response, NextFunction } from "express";
 import { verifyToken, verifyRefreshToken } from "./token";
 
 export function authenticateToken(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers["authorization"];
+  const token: string = (authHeader && authHeader.split(" ")[1]) ?? ""; // Bearer <token>
   
- 
-    const authHeader = req.headers["authorization"];
-    const token: string = (authHeader && authHeader.split(" ")[1]) ?? ""; // Bearer <token>
-  
-
   if (!token) {
     return res.status(401).json({ error: "Token requerido" });
   }
 
   const decoded = verifyToken(token);
   if (!decoded) {
-    return res.status(403).json({ error: "Token inválido o expirado" });
+    return res.status(401).json({ error: "Token inválido o expirado" });
   }
+  
+  const rol : string = (decoded as any).payload.rol;
 
-  (req as any).user = decoded;
-
-  const tokenUserid : string = (decoded as any).payload.id;
-  const requestUserid : string = req.params.id;
-  if (requestUserid && tokenUserid !== requestUserid) {
-    return res.status(403).json({ error: "No autorizado para acceder a este recurso" });
+  if (rol !== 'admin') {
+    return res.status(403).json({ error: "Se requieren privilegios de admin" });
   }
 
   console.log("Token verificado, usuario:", decoded);
   next();
 }
+
 export function authenticateRefreshToken(req: Request, res: Response, next: NextFunction) {
   try {
     const { refreshToken, userId } = req.body;
@@ -37,7 +33,7 @@ export function authenticateRefreshToken(req: Request, res: Response, next: Next
 
     const decoded = verifyRefreshToken(refreshToken);
     if (!decoded) {
-      return res.status(403).json({ error: "Refresh token inválido o expirado" });
+      return res.status(401).json({ error: "Refresh token es inválido" });
     }
     (req as any).user = decoded;
 

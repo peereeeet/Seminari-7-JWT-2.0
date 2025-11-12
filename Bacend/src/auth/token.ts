@@ -6,14 +6,14 @@ const JWT_SECRET = process.env.JWT_SECRET   || 'defaultsecret';
 const JWT_refreshSECRET = process.env.JWT_refreshSECRET || 'defaultrefreshsecret';
 
 const generateToken = (usuario: IUsuario, res: Response): string =>{
-    const payload = { id: usuario._id.toString() };
+    const payload = { id: usuario._id.toString(), rol: usuario.rol };
     
 const token : string = sign({payload}, JWT_SECRET, {expiresIn: "15s"});
 
 return token;
 };
 const generateRefreshToken = (usuario: IUsuario, res: Response): string =>{
-    const payload = { id: usuario._id.toString() }; 
+    const payload = { id: usuario._id.toString(), rol: usuario.rol }; 
     const refreshToken : string = sign({payload}, JWT_refreshSECRET, {expiresIn: "1y"});
 
 return refreshToken;

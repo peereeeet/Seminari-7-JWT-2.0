@@ -16,8 +16,8 @@ export async function createUser(req: Request, res: Response): Promise<Response>
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    const { username, gmail, password, birthday } = req.body as IUsuario;
-    const newUser: Partial<IUsuario> = { username, gmail, password, birthday };
+    const { username, gmail, password, birthday, rol } = req.body as IUsuario;
+    const newUser: Partial<IUsuario> = { username, gmail, password, birthday, rol };
     const user = await userService.createUser(newUser);
 
     return res.status(201).json({
@@ -106,34 +106,32 @@ export async function createUser(req: Request, res: Response): Promise<Response>
   }
   }
 
-
-
   export async function deleteUserById(req: Request, res: Response): Promise<Response> {
-  console.log('eliminar usuario por id');
-  try {
-    const { id } = req.params;
-    const deletedUser = await userService.deleteUserById(id);
-    if (!deletedUser) {
-      return res.status(404).json({ message: 'USUARIO NO ENCONTRADO' });
+    console.log('eliminar usuario por id');
+    try {
+      const { id } = req.params;    
+      console.log('ID recibido para eliminar:', id); 
+      const deletedUser = await userService.deleteUserById(id);
+      if (!deletedUser) {
+        return res.status(404).json({ message: 'USUARIO NO ENCONTRADO' });
+      }
+      return res.status(200).json(deletedUser);
+    } catch (error) {
+      return res.status(400).json({ message: (error as Error).message });
     }
-    return res.status(200).json(deletedUser);
-  } catch (error) {
-    return res.status(400).json({ message: (error as Error).message });
   }
-  }
-
 
   export async function deleteUserByUsername(req: Request, res: Response): Promise<Response> {
-  try {
-    const { username } = req.params;
-    const deletedUser = await userService.deleteUserByUsername(username);
-    if (!deletedUser) {
-      return res.status(404).json({ message: 'USUARIO NO ENCONTRADO' });
+    try {
+      const { username } = req.params;
+      const deletedUser = await userService.deleteUserByUsername(username);
+      if (!deletedUser) {
+        return res.status(404).json({ message: 'USUARIO NO ENCONTRADO' });
+      }
+      return res.status(200).json(deletedUser);
+    } catch (error) {
+      return res.status(400).json({ message: (error as Error).message });
     }
-    return res.status(200).json(deletedUser);
-  } catch (error) {
-    return res.status(400).json({ message: (error as Error).message });
-  }
   }
  
 
